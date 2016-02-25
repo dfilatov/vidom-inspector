@@ -1,0 +1,60 @@
+.Node
+{
+    font: 11px/11px Verdana;
+}
+
+.Node__tag,
+.Node__children
+{
+    padding: 1px 0 3px;
+}
+
+.Node_onlyStringChild .Node__tag:last-child
+{
+    padding-left: 1px;
+}
+
+.Node_hovered>.Node__tag,
+.Node_hovered.Node_onlyStringChild
+{
+    background: #e3f0fc;
+}
+
+.Node__tag
+{
+    color: #007281;
+}
+
+.Node_type_component>.Node__tag
+{
+    color: #d97e00;
+}
+
+.Node__attr
+{
+    margin-left: 3px;
+    color: #666;
+}
+
+.Node_onlyStringChild .Node__tag,
+.Node_onlyStringChild .Node__children
+{
+    display: inline-block;
+}
+
+.Node__attrName
+{
+    color: #08c;
+}
+
+.Node__collapser
+{
+    position: absolute;
+    margin: .1em 0 0 -1.2em;
+    display: block;
+    width: 1.2em;
+    font-size: 9px;
+    text-align: center;
+    color: #999;
+    cursor: pointer;
+}

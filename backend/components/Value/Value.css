@@ -1,0 +1,15 @@
+.Value_type_boolean,
+.Value_type_string
+{
+    color: #f13c00;
+}
+
+.Value_type_number
+{
+    color: #2cbb0f;
+}
+
+.Value__key
+{
+    color: #08c;
+}
