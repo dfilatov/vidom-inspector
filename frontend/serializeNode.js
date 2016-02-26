@@ -8,7 +8,7 @@ export default function serializeNode(node, rootId, path = []) {
         rootId : rootId || id,
         path,
         type : node._tag? 'tag' : 'component',
-        name : node._tag || (node._component.name),
+        name : node._tag || node._component.name || 'Function',
         key : node._key,
         attrs : serializeNodeAttrs(node),
         children : serializeNodeChildren(node, rootId || id, path),
