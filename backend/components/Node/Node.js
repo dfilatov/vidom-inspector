@@ -35,7 +35,7 @@ export default class Node extends Stateful {
     onRender({ node, onHighlight, onUnhighlight, onClick, level = 0 }) {
         const { type, name, attrs, children } = node,
             { hovered, collapsed } = this.getState(),
-            hasChildren = !!children && !collapsed,
+            hasChildren = !!children,
             onlyStringChild = hasChildren && typeof children === 'string',
             tagStyle = { paddingLeft : (level + 1.2) + 'em' };
 
@@ -46,7 +46,7 @@ export default class Node extends Stateful {
                 onMouseOut={ this._onMouseOut }
                 >
                 <div key="open" class={ tagClass } style={ tagStyle } dom-ref="openTag">
-                    { onlyStringChild?
+                    { !hasChildren || onlyStringChild?
                         null :
                         <span class={ collapserClass } onClick={ this._onCollapserClick }>
                             { collapsed? '▶' : '▼' }
@@ -55,10 +55,10 @@ export default class Node extends Stateful {
                     <span class={ tagNameClass } onClick={ this._onTagNameClick }>{ '<' + name }</span>
                     { attrs && renderAttrs(node, attrs) }
                     <span>
-                        { (hasChildren? '' : '/') + '>' }
+                        { (hasChildren && !collapsed? '' : '/') + '>' }
                     </span>
                 </div>
-                { hasChildren?
+                { hasChildren && !collapsed?
                     [
                         <div key="children" class={ childrenClass }>
                             { onlyStringChild?
