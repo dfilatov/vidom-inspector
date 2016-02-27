@@ -31,7 +31,7 @@ export default {
             tooltip.style.left = 'auto';
             tooltip.style.right = '0';
         }
-        else if(left < 0 || left + width > viewportWidth) {
+        else if(left <= 0) {
             tooltip.style.right = 'auto';
             tooltip.style.left = '0';
         }
@@ -48,7 +48,7 @@ export default {
             tooltip.style.top = 'auto';
             tooltip.style.bottom = '0';
         }
-        else if(top < 0 || top + height > viewportHeight) {
+        else if(top <= 0) {
             tooltip.style.bottom = 'auto';
             tooltip.style.top = '0';
         }
