@@ -5,27 +5,26 @@ const b = bem.with('Value'),
     MAX_ITEMS_COUNT = 3;
 
 export default function Value({ value, recursive = true }) {
-    return renderers[typeof value](value, recursive);
+    return renderers[value.type](value, recursive);
 }
 
 const renderers = {
-    'boolean' : value => <span class={ b({ type : 'boolean' }) }>{ value }</span>,
-    'number' : value => <span class={ b({ type : 'number'}) }>{ value }</span>,
-    'string' : value => <span class={ b({ type : 'string'}) }>{ '"' + value + '"' }</span>,
-    'function' : value => <span class={ b({ type : 'function'}) }>{ (value.name || 'fn') +'() {...}' }</span>,
-    'object' : (value, recursive) => value?
-        Array.isArray(value)?
-            renderers.array(value, recursive) :
-            <span class={ b({ type : 'object' }) }>
-                <span key="open">{ '{' }</span>
-                { recursive && isPlainObject(value)?
+    'boolean' : ({ value }) => <span class={ b({ type : 'boolean' }) }>{ value }</span>,
+    'number' : ({ value }) => <span class={ b({ type : 'number'}) }>{ value }</span>,
+    'string' : ({ value }) => <span class={ b({ type : 'string'}) }>{ '"' + value + '"' }</span>,
+    'function' : ({ name }) => <span class={ b({ type : 'function'}) }>()</span>,
+    'object' : ({ value, isPlain }, recursive) =>
+        <span class={ b({ type : 'object' }) }>
+            <span key="open">{ '{' }</span>
+            { isPlain?
+                recursive?
                     renderObject(value) :
-                    <span>...</span>
-                }
-                <span key="close">{ '}' }</span>
-            </span> :
-        renderers.null(value),
-    'array' : (value, recursive) => (
+                    <span>...</span> :
+                <span>{Object}</span>
+            }
+            <span key="close">{ '}' }</span>
+        </span>,
+    'array' : ({ value }, recursive) => (
         <span class={ b({ type : 'array'}) }>
             <span key="open">[</span>
             { recursive?
@@ -35,8 +34,8 @@ const renderers = {
             <span key="close">]</span>
         </span>
     ),
-    'null' : value => <span class={ b({ type : 'null'}) }>null</span>,
-    'undefined' : value => <span class={ b({ type : 'undefined'}) }>undefined</span>
+    'null' : () => <span class={ b({ type : 'null'}) }>null</span>,
+    'undefined' : () => <span class={ b({ type : 'undefined'}) }>undefined</span>
 };
 
 function renderObject(value) {
@@ -81,18 +80,4 @@ function renderArray(value) {
     }
 
     return res;
-}
-
-function isPlainObject(obj) {
-    if(Object.prototype.toString.call(obj) !== '[object Object]') {
-        return false;
-    }
-
-    const ctor = obj.constructor;
-    if(typeof ctor !== 'function') {
-        return false;
-    }
-
-    const proto = ctor.prototype;
-    return Object.prototype.toString.call(proto) === '[object Object]' && proto.hasOwnProperty('isPrototypeOf');
 }

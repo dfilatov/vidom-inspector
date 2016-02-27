@@ -53,7 +53,7 @@ export default class Node extends Stateful {
                         </span>
                     }
                     <span class={ tagNameClass } onClick={ this._onTagNameClick }>{ '<' + name }</span>
-                    { attrs && renderAttrs(node, attrs) }
+                    { renderAttrs(node, attrs) }
                     <span>
                         { (hasChildren && !collapsed? '' : '/') + '>' }
                     </span>
@@ -142,10 +142,10 @@ export default class Node extends Stateful {
     }
 }
 
-function renderAttrs(node, attrs) {
-    return Object.keys(attrs).map(name => {
-        if(node.type === 'tag' && typeof attrs[name] === 'boolean') {
-            return attrs[name]?
+function renderAttrs(node, { value }) {
+    return value && Object.keys(value).map(name => {
+        if(node.type === 'tag' && value[name].type === 'boolean') {
+            return value[name].value?
                 <span key={ name } class={ b('attr') }>
                     <span key="name" class={ b('attrName') }>{ name }</span>
                 </span> :
@@ -157,7 +157,7 @@ function renderAttrs(node, attrs) {
                 <span class={ attrNameClass }>{ name }</span>
                 <span>=</span>
                 <span class={ attrValueClass }>
-                    <Value value={ attrs[name] }/>
+                    <Value value={ value[name] }/>
                 </span>
             </span>
         );
