@@ -35,8 +35,8 @@ const renderers = {
             <span key="close">]</span>
         </span>
     ),
-    'null' : value => <span class={ b({ type : 'null'}) }>{ value }</span>,
-    'undefined' : value => <span class={ b({ type : 'undefined'}) }>{ value }</span>
+    'null' : value => <span class={ b({ type : 'null'}) }>null</span>,
+    'undefined' : value => <span class={ b({ type : 'undefined'}) }>undefined</span>
 };
 
 function renderObject(value) {
