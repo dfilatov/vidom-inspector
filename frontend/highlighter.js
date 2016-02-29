@@ -3,10 +3,12 @@ const highlighter = document.createElement('div'),
 
 highlighter.style.display = 'none';
 highlighter.style.position = 'fixed';
-highlighter.style.background = 'rgba(76, 158, 217, .2)';
+highlighter.style.zIndex = '10000';
+highlighter.style.background = 'rgba(76, 158, 217, .4)';
 
 tooltip.style.display = 'none';
 tooltip.style.position = 'fixed';
+tooltip.style.zIndex = '10000';
 tooltip.style.background = '#ffee8f';
 tooltip.style.borderRadius = '3px';
 tooltip.style.padding = '2px 4px';
