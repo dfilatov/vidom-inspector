@@ -8,7 +8,7 @@ port.onDisconnect.addListener(onPortDisconnect);
 function postMessageToWindow(message) {
     window.postMessage({
         source : 'vidom-inspector',
-        message : JSON.stringify(message)
+        message
     }, '*');
 }
 
@@ -23,7 +23,7 @@ function onPortMessage(message) {
 
 function onWindowMessage({ data }) {
     if(data && data.source === 'vidom-agent') {
-        port.postMessage(JSON.parse(data.message));
+        port.postMessage(data.message);
     }
 }
 

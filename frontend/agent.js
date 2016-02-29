@@ -1,6 +1,8 @@
-import serializeNode from './serializeNode';
+import buildTree from './buildTree';
+import serializeTree from './serializeTree';
 import identifyNode from './identifyNode';
 import highlighter from './highlighter';
+import getDomNodeId from './getDomNodeId';
 
 const messageHandlers = {
         init,
@@ -11,17 +13,17 @@ const messageHandlers = {
     };
 
 const globalHook = window.__vidom__hook__;
-let nodes = {};
+let nodesData = { nodes : {}, domNodes : {} };
 
 function init() {
     const rootNodes = {};
 
     globalHook.getRootNodes().forEach(rootNode => {
-        const serializedRootNode = serializeNode(rootNode);
+        const tree = buildTree(rootNode);
 
-        nodes = { ...nodes, ...collectNodes(serializedRootNode) };
+        collectTreeData(tree, nodesData);
 
-        rootNodes[serializedRootNode.id] = serializedRootNode;
+        rootNodes[tree.id] = serializeTree(tree);
     });
 
     emit('init', { rootNodes });
@@ -33,41 +35,34 @@ function init() {
 }
 
 function onRootNodeMount(rootNode) {
-    const serializedRootNode = serializeNode(rootNode);
+    const tree = buildTree(rootNode);
 
-    nodes = { ...nodes, ...collectNodes(serializedRootNode) };
+    collectTreeData(tree, nodesData);
 
-    emit('mount', { rootNode : serializedRootNode });
+    emit('mount', { rootNode : serializeTree(tree) });
 }
 
 function onRootNodeUnmount(rootNode) {
-    const rootNodeId = identifyNode(rootNode),
-        nodesToRemove = collectNodes(nodes[rootNodeId]);
+    const rootNodeId = identifyNode(rootNode);
 
-    nodes = { ...nodes };
-    for(let nodeId in nodesToRemove) {
-        delete nodes[nodeId];
-    }
+    uncollectNodesData(collectTreeData(nodesData.nodes[rootNodeId]), nodesData);
 
     emit('unmount', { rootNodeId });
 }
 
 function onNodeReplace(oldNode, newNode) {
     const oldNodeId = identifyNode(oldNode),
-        { rootId, path } = nodes[oldNodeId],
-        nodesToRemove = collectNodes(nodes[oldNodeId]),
-        serializedNewNode = serializeNode(newNode, rootId, path);
+        { rootId, path } = nodesData.nodes[oldNodeId],
+        tree = buildTree(newNode, rootId, path);
 
-    nodes = { ...nodes, ...collectNodes(serializedNewNode) };
-    for(let nodeId in nodesToRemove) {
-        delete nodes[nodeId];
-    }
+    collectTreeData(tree, nodesData);
+    uncollectNodesData(collectTreeData(nodesData.nodes[oldNodeId]), nodesData);
 
-    emit('replace', { newNode : serializedNewNode });
+    emit('replace', { newNode : serializeTree(tree) });
 }
 
 function shutdown() {
-    nodes = {};
+    nodesData = { nodes : {}, domNodes : {} };
 
     globalHook
         .off('mount', onRootNodeMount)
@@ -76,8 +71,10 @@ function shutdown() {
 }
 
 function highlightNode({ nodeId }) {
+    const { nodes } = nodesData;
+
     if(nodes[nodeId]) {
-        highlighter.highlight(nodes[nodeId].originalNode.getDomNode());
+        highlighter.highlight(nodes[nodeId].node.getDomNode());
     }
 }
 
@@ -86,31 +83,55 @@ function unhighlightNode({ nodeId }) {
 }
 
 function showNode({ nodeId }) {
+    const { nodes } = nodesData;
+
     if(nodes[nodeId]) {
-        highlighter.show(nodes[nodeId].originalNode.getDomNode());
+        highlighter.show(nodes[nodeId].node.getDomNode());
     }
 }
 
-function collectNodes(node, res = {}) {
-    res[node.id] = node;
+function collectTreeData(treeNode, res = { nodes : {}, domNodes : {} }) {
+    const { nodes, domNodes } = res,
+        { domNodeId } = treeNode;
 
-    if(Array.isArray(node.children)) {
-        node.children.forEach(child => collectNodes(child, res));
+    nodes[treeNode.id] = treeNode;
+    (domNodes[domNodeId] || (domNodes[domNodeId] = [])).push(treeNode.id);
+
+    if(Array.isArray(treeNode.children)) {
+        treeNode.children.forEach(child => collectTreeData(child, res));
     }
 
     return res;
 }
 
+function uncollectNodesData(from, res) {
+    const { nodes : fromNodes, domNodes : fromDomNodes } = from,
+        { nodes : resNodes, domNodes : resDomNodes } = res;
+
+    for(let nodeId in fromNodes) {
+        delete resNodes[nodeId];
+    }
+
+    for(let domNodeId in fromDomNodes) {
+        fromDomNodes[domNodeId].forEach(nodeId => {
+            resDomNodes[domNodeId].splice(resDomNodes[domNodeId].indexOf(nodeId), 1);
+            if(!resDomNodes[domNodeId].length) {
+                delete resDomNodes[domNodeId];
+            }
+        });
+    }
+}
+
 function emit(type, payload) {
     window.postMessage({
         source : 'vidom-agent',
-        message : JSON.stringify({ type, payload })
+        message : { type, payload }
     }, '*');
 }
 
 window.addEventListener('message', ({ data }) => {
     if(data && data.source === 'vidom-inspector') {
-        const { type, payload } = JSON.parse(data.message);
+        const { type, payload } = data.message;
 
         if(!messageHandlers[type]) {
             throw Error(`Unknown message: ${type}`);

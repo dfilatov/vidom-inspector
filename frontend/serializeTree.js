@@ -1,28 +1,19 @@
-import identifyNode from './identifyNode';
-
-export default function serializeNode(node, rootId, path = []) {
-    const id = identifyNode(node);
+export default function serializeTree(treeNode) {
+    const { id, rootId, path, node } = treeNode;
 
     return {
         id,
-        rootId : rootId || id,
+        rootId,
         path,
         type : node._tag? 'tag' : 'component',
         name : node._tag || node._component.name || 'Function',
         key : node._key,
-        attrs : serializeNodeAttrs(node),
-        children : serializeNodeChildren(node, rootId || id, path),
-        originalNode : node,
-        toJSON
+        attrs : serializeTreeNodeAttrs(treeNode),
+        children : serializeTreeNodeChildren(treeNode)
     };
 }
 
-function toJSON() {
-    const { originalNode, ...json } = this;
-    return json;
-}
-
-function serializeNodeAttrs(node) {
+function serializeTreeNodeAttrs({ node }) {
     const attrs = node._tag || !node._instance?
         node._attrs :
         node._instance.getAttrs();
@@ -30,24 +21,11 @@ function serializeNodeAttrs(node) {
     return serialize(attrs);
 }
 
-function serializeNodeChildren(node, rootId, path) {
-    if(node._tag) {
-        const children = node._children;
-
-        return children?
-            typeof children === 'string'?
-                children :
-                children.map((node, i) => serializeNode(node, rootId, [...path, i])) :
-            null;
-    }
-
-    return [serializeNode(
-        node._instance?
-            node._instance.getRootNode() :
-            node._getRootNode(),
-        rootId,
-        [...path, 0])
-    ];
+function serializeTreeNodeChildren(treeNode) {
+    return treeNode.children &&
+        (typeof treeNode.children === 'string'?
+            treeNode.children :
+            treeNode.children.map(serializeTree));
 }
 
 function serialize(something) {
