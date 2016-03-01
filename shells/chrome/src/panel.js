@@ -11,13 +11,12 @@ port.onMessage.addListener(onPortMessage);
 function onPortMessage(message) {
     if(message.type === 'connect') {
         inject(chrome.runtime.getURL('build/agent.js'), () => {
-            port.postMessage({ type : 'init' });
+            port.postMessage({ type : 'initInspector' });
         });
         chrome.devtools.network.onNavigated.addListener(onNavigated);
     }
-    else if(message.type === 'init') {
+    else if(message.type === 'initAgent') {
         window.addEventListener('message', onWindowMessage);
-
         mount(document.body, () => {
             window.postMessage(message, '*');
         });

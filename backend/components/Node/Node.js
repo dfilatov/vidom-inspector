@@ -32,7 +32,7 @@ export default class Node extends Stateful {
         return node !== prevNode || this.getState() !== this.getPrevState();
     }
 
-    onRender({ node, onHighlight, onUnhighlight, onClick, level = 0 }) {
+    onRender({ node, actions, level = 0 }) {
         const { type, name, attrs, children } = node,
             { hovered, collapsed } = this.getState(),
             hasChildren = !!children,
@@ -66,9 +66,7 @@ export default class Node extends Stateful {
                                 children.map(child =>
                                     <Node
                                         node={ child }
-                                        onHighlight={ onHighlight }
-                                        onUnhighlight={ onUnhighlight }
-                                        onClick={ onClick }
+                                        actions={ actions }
                                         level={ level + 1 }
                                     />)
                             }
@@ -92,27 +90,30 @@ export default class Node extends Stateful {
 
     onUpdate() {
         if(this.getState().hovered) {
-            const { node, onHighlight } = this.getAttrs();
-            onHighlight && onHighlight(node.id);
+            const { node, actions } = this.getAttrs();
+
+            actions.highlightNode(node);
         }
     }
 
     onUnmount() {
         if(this.getState().hovered) {
-            const { node, onUnhighlight } = this.getAttrs();
-            onUnhighlight && onUnhighlight(node.id);
+            const { node, actions } = this.getAttrs();
+
+            actions.unhighlightNode(node);
         }
     }
 
     _onMouseOver(e) {
         e.stopPropagation();
 
-        if(!this.getState().hovered) {
-            this.setState({ hovered : true });
+        const { node, actions } = this.getAttrs();
 
-            const { node, onHighlight } = this.getAttrs();
-            onHighlight && onHighlight(node.id);
-        }
+       if(!this.getState().hovered) {
+           this.setState({ hovered : true });
+
+           actions.highlightNode(node);
+       }
     }
 
     _onMouseOut(e) {
@@ -123,8 +124,9 @@ export default class Node extends Stateful {
         if(['openTag', 'closeTag'].every(ref => !this.getDomRef(ref) || !this.getDomRef(ref).contains(relatedTarget))) {
             this.setState({ hovered : false });
 
-            const { node, onUnhighlight } = this.getAttrs();
-            onUnhighlight && onUnhighlight(node.id);
+            const { node, actions } = this.getAttrs();
+
+            actions.unhighlightNode(node);
         }
     }
 
@@ -137,8 +139,9 @@ export default class Node extends Stateful {
     _onTagNameClick(e) {
         e.stopPropagation();
 
-        const { node, onClick } = this.getAttrs();
-        onClick && onClick(node.id);
+        const { node, actions } = this.getAttrs();
+
+        actions.showNode(node);
     }
 }
 

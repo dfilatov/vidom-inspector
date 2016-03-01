@@ -19,6 +19,7 @@
   "permissions": [
     "file:///*",
     "http://*/*",
-    "https://*/*"
+    "https://*/*",
+    "contextMenus"
   ]
 }

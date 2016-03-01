@@ -17,9 +17,7 @@ class Tree extends Component {
                         <Node
                             key={ id }
                             node={ rootNodes[id] }
-                            onHighlight={ actions.highlightNode }
-                            onUnhighlight={ actions.unhighlightNode }
-                            onClick={ actions.showNode }
+                            actions={ actions }
                         />)
                 }
             </div>

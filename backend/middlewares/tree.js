@@ -14,12 +14,12 @@ export default store => {
     window.addEventListener('message', ({ data }) => {
         const { type, payload } = data;
 
-        if(!inited && type !== 'init') {
+        if(!inited && type !== 'initAgent') {
             return;
         }
 
         switch(type) {
-            case 'init':
+            case 'initAgent':
                 for(let id in payload.rootNodes) {
                     store.dispatch(addRootNode(payload.rootNodes[id]));
                 }
@@ -50,15 +50,15 @@ export default store => {
 
         switch(action.type) {
             case HIGHLIGHT_NODE:
-                postMessage('highlightNode', { nodeId : action.nodeId });
+                postMessage('highlightNode', { nodeId : action.payload.node.id });
             break;
 
             case UNHIGHLIGHT_NODE:
-                postMessage('unhighlightNode', { nodeId : action.nodeId });
+                postMessage('unhighlightNode', { nodeId : action.payload.node.id });
             break;
 
             case SHOW_NODE:
-                postMessage('showNode', { nodeId : action.nodeId });
+                postMessage('showNode', { nodeId : action.payload.node.id });
             break;
         }
     };

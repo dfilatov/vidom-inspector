@@ -8,41 +8,41 @@ export const SHOW_NODE = 'SHOW_NODE';
 export function addRootNode(node) {
     return {
         type : ADD_ROOT_NODE,
-        node : node
+        payload : { node }
     };
 }
 
 export function removeRootNode(nodeId) {
     return {
         type : REMOVE_ROOT_NODE,
-        nodeId
+        payload : { nodeId }
     };
 }
 
 export function replaceNode(newNode) {
     return {
         type : REPLACE_NODE,
-        newNode
+        payload : { newNode }
     };
 }
 
-export function highlightNode(nodeId) {
+export function highlightNode(node) {
     return {
         type : HIGHLIGHT_NODE,
-        nodeId
-    }
+        payload : { node }
+    };
 }
 
-export function unhighlightNode(nodeId) {
+export function unhighlightNode(node) {
     return {
         type : UNHIGHLIGHT_NODE,
-        nodeId
-    }
+        payload : { node }
+    };
 }
 
-export function showNode(nodeId) {
+export function showNode(node) {
     return {
         type : SHOW_NODE,
-        nodeId
-    }
+        payload : { node }
+    };
 }

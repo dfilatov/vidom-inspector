@@ -5,17 +5,17 @@ import highlighter from './highlighter';
 import getDomNodeId from './getDomNodeId';
 
 const messageHandlers = {
-        init,
-        shutdown,
-        highlightNode,
-        unhighlightNode,
-        showNode
+        initInspector : onInspectorInit,
+        shutdown : onShutdown,
+        highlightNode : onHighlightNode,
+        unhighlightNode : onUnhighlightNode,
+        showNode : onShowNode
     };
 
 const globalHook = window.__vidom__hook__;
 let nodesData = { nodes : {}, domNodes : {} };
 
-function init() {
+function onInspectorInit() {
     const rootNodes = {};
 
     globalHook.getRootNodes().forEach(rootNode => {
@@ -26,12 +26,14 @@ function init() {
         rootNodes[tree.id] = serializeTree(tree);
     });
 
-    emit('init', { rootNodes });
+    emit('initAgent', { rootNodes });
 
     globalHook
         .on('mount', onRootNodeMount)
         .on('unmount', onRootNodeUnmount)
         .on('replace', onNodeReplace);
+
+    document.addEventListener('mousedown', onDocumentMouseDown);
 }
 
 function onRootNodeMount(rootNode) {
@@ -61,16 +63,19 @@ function onNodeReplace(oldNode, newNode) {
     emit('replace', { newNode : serializeTree(tree) });
 }
 
-function shutdown() {
+function onShutdown() {
     nodesData = { nodes : {}, domNodes : {} };
 
     globalHook
         .off('mount', onRootNodeMount)
         .off('unmount', onRootNodeUnmount)
         .off('replace', onNodeReplace);
+
+    document.removeEventListener('mousedown', onDocumentMouseDown);
+    window.removeEventListener('message', onWindowMessage);
 }
 
-function highlightNode({ nodeId }) {
+function onHighlightNode({ nodeId }) {
     const { nodes } = nodesData;
 
     if(nodes[nodeId]) {
@@ -78,11 +83,11 @@ function highlightNode({ nodeId }) {
     }
 }
 
-function unhighlightNode({ nodeId }) {
+function onUnhighlightNode({ nodeId }) {
     highlighter.unhighlight();
 }
 
-function showNode({ nodeId }) {
+function onShowNode({ nodeId }) {
     const { nodes } = nodesData;
 
     if(nodes[nodeId]) {
@@ -129,7 +134,12 @@ function emit(type, payload) {
     }, '*');
 }
 
-window.addEventListener('message', ({ data }) => {
+function onDocumentMouseDown(e) {
+    const domNodeId = getDomNodeId(e.target);
+    console.log(nodesData.domNodes[domNodeId]);
+}
+
+function onWindowMessage({ data }) {
     if(data && data.source === 'vidom-inspector') {
         const { type, payload } = data.message;
 
@@ -139,4 +149,6 @@ window.addEventListener('message', ({ data }) => {
 
         messageHandlers[type](payload);
     }
-});
+}
+
+window.addEventListener('message', onWindowMessage);

@@ -21,5 +21,3 @@ function createVidomPanel() {
 const checkForVidomInterval = setInterval(detectVidom, 1000);
 
 detectVidom();
-
-
