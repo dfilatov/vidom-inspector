@@ -33,7 +33,19 @@ function onInspectorInit() {
         .on('unmount', onRootNodeUnmount)
         .on('replace', onNodeReplace);
 
-    document.addEventListener('mousedown', onDocumentMouseDown);
+    highlighter.init();
+}
+
+function onShutdown() {
+    nodesData = { nodes : {}, domNodes : {} };
+
+    globalHook
+        .off('mount', onRootNodeMount)
+        .off('unmount', onRootNodeUnmount)
+        .off('replace', onNodeReplace);
+
+    highlighter.shutdown();
+    window.removeEventListener('message', onWindowMessage);
 }
 
 function onRootNodeMount(rootNode) {
@@ -61,18 +73,6 @@ function onNodeReplace(oldNode, newNode) {
     uncollectNodesData(collectTreeData(nodesData.nodes[oldNodeId]), nodesData);
 
     emit('replace', { newNode : serializeTree(tree) });
-}
-
-function onShutdown() {
-    nodesData = { nodes : {}, domNodes : {} };
-
-    globalHook
-        .off('mount', onRootNodeMount)
-        .off('unmount', onRootNodeUnmount)
-        .off('replace', onNodeReplace);
-
-    document.removeEventListener('mousedown', onDocumentMouseDown);
-    window.removeEventListener('message', onWindowMessage);
 }
 
 function onHighlightNode({ nodeId }) {
@@ -132,11 +132,6 @@ function emit(type, payload) {
         source : 'vidom-agent',
         message : { type, payload }
     }, '*');
-}
-
-function onDocumentMouseDown(e) {
-    const domNodeId = getDomNodeId(e.target);
-    console.log(nodesData.domNodes[domNodeId]);
 }
 
 function onWindowMessage({ data }) {

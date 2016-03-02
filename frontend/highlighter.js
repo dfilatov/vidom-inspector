@@ -1,24 +1,37 @@
-const highlighter = document.createElement('div'),
-    tooltip = document.createElement('div');
-
-highlighter.style.display = 'none';
-highlighter.style.position = 'fixed';
-highlighter.style.zIndex = '10000';
-highlighter.style.background = 'rgba(76, 158, 217, .4)';
-
-tooltip.style.display = 'none';
-tooltip.style.position = 'fixed';
-tooltip.style.zIndex = '10000';
-tooltip.style.background = '#ffee8f';
-tooltip.style.borderRadius = '3px';
-tooltip.style.padding = '2px 4px';
-tooltip.style.font = '10px Verdana';
-tooltip.style.margin = '2px';
-
-document.body.appendChild(highlighter);
-document.body.appendChild(tooltip);
+let highlighter = null,
+    tooltip = null;
 
 export default {
+    init() {
+        highlighter = document.createElement('div');
+        tooltip = document.createElement('div');
+
+        highlighter.style.display = 'none';
+        highlighter.style.position = 'fixed';
+        highlighter.style.zIndex = '10000';
+        highlighter.style.background = 'rgba(76, 158, 217, .4)';
+
+        tooltip.style.display = 'none';
+        tooltip.style.position = 'fixed';
+        tooltip.style.zIndex = '10000';
+        tooltip.style.background = '#ffee8f';
+        tooltip.style.borderRadius = '3px';
+        tooltip.style.padding = '2px 4px';
+        tooltip.style.font = '10px Verdana';
+        tooltip.style.margin = '2px';
+
+        document.body.appendChild(highlighter);
+        document.body.appendChild(tooltip);
+    },
+
+    shutdown() {
+        document.body.removeChild(highlighter);
+        document.body.removeChild(tooltip);
+
+        highlighter = null;
+        tooltip = null;
+    },
+
     highlight(domNode) {
         const { left, top, width, height } = domNode.getBoundingClientRect(),
             { innerWidth : viewportWidth, innerHeight : viewportHeight } = window;
