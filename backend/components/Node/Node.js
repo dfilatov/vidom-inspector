@@ -21,27 +21,44 @@ export default class Node extends Stateful {
         this._onTagNameClick = this._onTagNameClick.bind(this);
     }
 
-    getInitialState({ node }) {
+    getInitialState({ node, expandPath, level }) {
+        const inExpandPath = !!(expandPath && expandPath[level] === node.id);
+
         return {
             hovered : false,
-            collapsed : node.type !== 'tag'
+            collapsed : node.type !== 'tag' && !inExpandPath,
+            selected : inExpandPath && expandPath.length === level + 1
         };
+    }
+
+    onAttrsReceive({ expandPath, level }, { expandPath : prevExpandPath, node }) {
+        if(expandPath !== prevExpandPath) {
+            if(expandPath && expandPath[level] === node.id) {
+                this.setState({
+                    collapsed : false,
+                    selected : expandPath.length === level + 1
+                });
+            }
+            else if(prevExpandPath) {
+                this.setState({ selected : false });
+            }
+        }
     }
 
     shouldUpdate({ node }, { node : prevNode }) {
         return node !== prevNode || this.getState() !== this.getPrevState();
     }
 
-    onRender({ node, actions, level = 0 }) {
+    onRender({ node, actions, level, expandPath }) {
         const { type, name, attrs, children } = node,
-            { hovered, collapsed } = this.getState(),
+            { hovered, collapsed, selected } = this.getState(),
             hasChildren = !!children,
             onlyStringChild = hasChildren && typeof children === 'string',
             tagStyle = { paddingLeft : (level + 1.2) + 'em' };
 
         return (
             <div
-                class={ b({ type, onlyStringChild, hovered, collapsed }) }
+                class={ b({ type, onlyStringChild, hovered, collapsed, selected }) }
                 onMouseOver={ this._onMouseOver }
                 onMouseOut={ this._onMouseOut }
                 >
@@ -68,6 +85,7 @@ export default class Node extends Stateful {
                                         node={ child }
                                         actions={ actions }
                                         level={ level + 1 }
+                                        expandPath={ expandPath }
                                     />)
                             }
                         </div>,
@@ -88,8 +106,20 @@ export default class Node extends Stateful {
         );
     }
 
+    onMount() {
+        if(this.getState().selected) {
+            scrollIntoViewIfNeeded(this.getDomRef('openTag'));
+        }
+    }
+
     onUpdate() {
-        if(this.getState().hovered) {
+        const { selected, hovered } = this.getState();
+
+        if(selected && !this.getPrevState().selected) {
+            scrollIntoViewIfNeeded(this.getDomRef('openTag'));
+        }
+
+        if(hovered) {
             const { node, actions } = this.getAttrs();
 
             actions.highlightNode(node);
@@ -109,11 +139,11 @@ export default class Node extends Stateful {
 
         const { node, actions } = this.getAttrs();
 
-       if(!this.getState().hovered) {
+        if(!this.getState().hovered) {
            this.setState({ hovered : true });
 
            actions.highlightNode(node);
-       }
+        }
     }
 
     _onMouseOut(e) {
@@ -165,4 +195,13 @@ function renderAttrs(node, { value }) {
             </span>
         );
     });
+}
+
+function scrollIntoViewIfNeeded(domNode) {
+    const { top, height } = domNode.getBoundingClientRect(),
+        { innerHeight : viewportHeight } = window;
+
+    if(top < 0 || top + height > viewportHeight) {
+        domNode.scrollIntoView();
+    }
 }

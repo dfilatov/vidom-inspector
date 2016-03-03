@@ -1,0 +1,8 @@
+.Toolbar
+{
+    flex-shrink: 0;
+    display: flex;
+    padding: 5px 8px;
+    background: #f3f3f3;
+    border-bottom: 1px solid #ccc;
+}

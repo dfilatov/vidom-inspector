@@ -8,7 +8,7 @@ const b = bem.with('Tree');
 
 class Tree extends Component {
     onRender({ tree, actions }) {
-        const { rootNodes } = tree;
+        const { rootNodes, expandPath } = tree;
 
         return (
             <div class={ b() }>
@@ -17,6 +17,8 @@ class Tree extends Component {
                         <Node
                             key={ id }
                             node={ rootNodes[id] }
+                            level={ 0 }
+                            expandPath={ expandPath }
                             actions={ actions }
                         />)
                 }

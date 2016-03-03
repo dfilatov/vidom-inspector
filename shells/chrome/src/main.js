@@ -15,7 +15,16 @@ function detectVidom() {
 }
 
 function createVidomPanel() {
-    chrome.devtools.panels.create('Vidom', '', 'panel.html');
+    chrome.devtools.panels.create('Vidom', '', 'panel.html', panel => {
+        let win = null;
+        panel.onShown.addListener(window => {
+            win = window;
+        });
+
+        panel.onHidden.addListener(() => {
+            win.postMessage({ type : 'pause' }, '*');
+        })
+    });
 }
 
 const checkForVidomInterval = setInterval(detectVidom, 1000);

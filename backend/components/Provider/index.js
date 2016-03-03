@@ -3,9 +3,15 @@ import { Component } from 'vidom';
 export default class Provider extends Component {
     onInit({ store }) {
         this._childCtx = { store };
+
+        let prevState = store.getState();
+
         this._unsubscribeFromStore = store.subscribe(() => {
-            //console.log(store.getState());
-            this.update();
+            const newState = store.getState();
+
+            if(newState !== prevState) {
+                this.update();
+            }
         });
     }
 

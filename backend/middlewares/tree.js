@@ -2,10 +2,14 @@ import {
     HIGHLIGHT_NODE,
     UNHIGHLIGHT_NODE,
     SHOW_NODE,
+    ENABLE_NODE_SELECTOR,
+    DISABLE_NODE_SELECTOR,
 
     addRootNode,
     removeRootNode,
-    replaceNode
+    replaceNode,
+    expandNodes,
+    disableNodeSelector
 } from '../actions/tree';
 
 let inited = false;
@@ -38,10 +42,20 @@ export default store => {
                 store.dispatch(replaceNode(payload.newNode));
             break;
 
+            case 'expand':
+                store.dispatch(expandNodes(payload.rootId, payload.path));
+            break;
+
+            case 'pause':
+                store.dispatch(disableNodeSelector());
+            break;
+
             case 'shutdown':
                 for(let rootNodeId in store.getState().tree.rootNodes) {
                     store.dispatch(removeRootNode(rootNodeId));
                 }
+                store.dispatch(disableNodeSelector());
+            break;
         }
     });
 
@@ -59,6 +73,14 @@ export default store => {
 
             case SHOW_NODE:
                 postMessage('showNode', { nodeId : action.payload.node.id });
+            break;
+
+            case ENABLE_NODE_SELECTOR:
+                postMessage('enableNodeSelector');
+            break;
+
+            case DISABLE_NODE_SELECTOR:
+                postMessage('disableNodeSelector');
             break;
         }
     };

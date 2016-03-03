@@ -3,14 +3,17 @@ let highlighter = null,
 
 export default {
     init() {
-        highlighter = document.createElement('div');
-        tooltip = document.createElement('div');
+        if(highlighter) {
+            return;
+        }
 
+        highlighter = document.createElement('div');
         highlighter.style.display = 'none';
         highlighter.style.position = 'fixed';
         highlighter.style.zIndex = '10000';
         highlighter.style.background = 'rgba(76, 158, 217, .4)';
 
+        tooltip = document.createElement('div');
         tooltip.style.display = 'none';
         tooltip.style.position = 'fixed';
         tooltip.style.zIndex = '10000';
@@ -25,6 +28,10 @@ export default {
     },
 
     shutdown() {
+        if(!highlighter) {
+            return;
+        }
+
         document.body.removeChild(highlighter);
         document.body.removeChild(tooltip);
 

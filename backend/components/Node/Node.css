@@ -1,5 +1,6 @@
 .Node
 {
+    position: relative;
     font: 11px/11px Verdana;
 }
 
@@ -20,6 +21,12 @@
     background: #e3f0fc;
 }
 
+.Node_selected>.Node__tag,
+.Node_selected.Node_onlyStringChild
+{
+    background: #fbd553;
+}
+
 .Node__tag
 {
     color: #007281;
@@ -28,6 +35,11 @@
 .Node_type_component>.Node__tag
 {
     color: #d97e00;
+}
+
+.Node__tagName
+{
+    cursor: default;
 }
 
 .Node__attr

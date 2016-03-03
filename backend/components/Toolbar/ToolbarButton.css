@@ -1,0 +1,15 @@
+.ToolbarButton
+{
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    border: 0;
+    outline: none;
+    cursor: pointer;
+    user-select: none;
+}
+
+.ToolbarButton__icon
+{
+    display: block;
+}

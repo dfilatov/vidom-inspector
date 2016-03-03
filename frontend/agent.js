@@ -2,6 +2,7 @@ import buildTree from './buildTree';
 import serializeTree from './serializeTree';
 import identifyNode from './identifyNode';
 import highlighter from './highlighter';
+import selector from './selector';
 import getDomNodeId from './getDomNodeId';
 
 const messageHandlers = {
@@ -9,7 +10,9 @@ const messageHandlers = {
         shutdown : onShutdown,
         highlightNode : onHighlightNode,
         unhighlightNode : onUnhighlightNode,
-        showNode : onShowNode
+        showNode : onShowNode,
+        enableNodeSelector : onEnableNodeSelector,
+        disableNodeSelector : onDisableNodeSelector
     };
 
 const globalHook = window.__vidom__hook__;
@@ -34,6 +37,7 @@ function onInspectorInit() {
         .on('replace', onNodeReplace);
 
     highlighter.init();
+    selector.init();
 }
 
 function onShutdown() {
@@ -45,6 +49,8 @@ function onShutdown() {
         .off('replace', onNodeReplace);
 
     highlighter.shutdown();
+    selector.shutdown();
+
     window.removeEventListener('message', onWindowMessage);
 }
 
@@ -92,6 +98,30 @@ function onShowNode({ nodeId }) {
 
     if(nodes[nodeId]) {
         highlighter.show(nodes[nodeId].node.getDomNode());
+    }
+}
+
+function onEnableNodeSelector() {
+    selector.enable(onDomNodeHover, onDomNodeSelect);
+}
+
+function onDisableNodeSelector() {
+    selector.disable();
+}
+
+function onDomNodeHover(domNode) {
+    const domNodeId = getDomNodeId(domNode);
+
+    return !!nodesData.domNodes[domNodeId];
+}
+
+function onDomNodeSelect(domNode) {
+    const domNodeId = getDomNodeId(domNode),
+        nodeIds = nodesData.domNodes[domNodeId];
+
+    if(nodeIds) {
+        const mostInnerTreeNode = nodesData.nodes[nodeIds[nodeIds.length - 1]];
+        emit('expand', { rootId : mostInnerTreeNode.rootId, path : mostInnerTreeNode.path });
     }
 }
 

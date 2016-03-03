@@ -2,10 +2,15 @@ import {
     ADD_ROOT_NODE,
     REMOVE_ROOT_NODE,
     REPLACE_NODE,
+    EXPAND_NODES,
+    ENABLE_NODE_SELECTOR,
+    DISABLE_NODE_SELECTOR
 } from '../actions/tree';
 
 const INITIAL_STATE = {
-        rootNodes : {}
+        rootNodes : {},
+        expandPath : null,
+        nodeSelectorEnabled : false
     },
     reducers = {
         ADD_ROOT_NODE(state, payload) {
@@ -23,7 +28,10 @@ const INITIAL_STATE = {
 
             return {
                 ...state,
-                rootNodes
+                rootNodes,
+                expandPath : state.expandPath && state.expandPath[0] === payload.nodeId?
+                    null :
+                    state.expandPath
             };
         },
 
@@ -36,6 +44,39 @@ const INITIAL_STATE = {
                     ...state.rootNodes,
                     [rootId] : replaceNodeInPath(state.rootNodes[rootId], path, 0, payload.newNode)
                 }
+            };
+        },
+
+        EXPAND_NODES(state, payload) {
+            const { path, rootId } = payload,
+                expandPath = [rootId];
+
+            let node = state.rootNodes[rootId],
+                i = 0;
+
+            while(i < path.length) {
+                node = node.children[path[i++]];
+                expandPath.push(node.id);
+            }
+
+            return {
+                ...state,
+                expandPath
+            };
+        },
+
+        ENABLE_NODE_SELECTOR(state) {
+            return {
+                ...state,
+                nodeSelectorEnabled : true
+            };
+        },
+
+        DISABLE_NODE_SELECTOR(state) {
+            return {
+                ...state,
+                nodeSelectorEnabled : false,
+                expandPath : null
             };
         }
     };

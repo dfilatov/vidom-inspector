@@ -17,21 +17,6 @@ chrome.runtime.onConnect.addListener(port => {
     (ports[tab] || (ports[tab] = {}))[name] = port;
 
     if(ports[tab].inspector && ports[tab].content) {
-        ports[tab].inspector.onMessage.addListener(onContentMessage);
-
-        function onContentMessage() {
-            ports[tab].inspector.onMessage.removeListener(onContentMessage);
-            installContextMenu();
-        }
-
-        function onDisconnect() {
-            ports[tab].inspector.onMessage.removeListener(onContentMessage);
-            uninstallContextMenu();
-        }
-
-        ports[tab].content.onDisconnect.addListener(onDisconnect);
-        ports[tab].inspector.onDisconnect.addListener(onDisconnect);
-
         connectPorts(ports[tab].inspector, ports[tab].content, tab);
     }
 });
@@ -69,25 +54,4 @@ function connectPorts(port1, port2, tab) {
 
     port1.postMessage({ type : 'connect' });
     port2.postMessage({ type : 'connect' });
-}
-
-function installContextMenu() {
-    chrome.contextMenus.create({
-        id : 'vidom-inspector',
-        title : 'Inspect vidom',
-        contexts : ['page', 'editable', 'image', 'video', 'audio', 'selection']
-    }, () => {
-        chrome.contextMenus.onClicked.addListener(onContextMenuClick);
-    });
-}
-
-function uninstallContextMenu() {
-    chrome.contextMenus.onClicked.removeListener(onContextMenuClick);
-    chrome.contextMenus.remove('vidom-inspector');
-}
-
-function onContextMenuClick(info) {
-    if(info.menuItemId === 'vidom-inspector') {
-        console.log(info);
-    }
 }
