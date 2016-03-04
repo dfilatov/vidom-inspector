@@ -76,7 +76,7 @@ function onNodeReplace(oldNode, newNode) {
         tree = buildTree(newNode, rootId, path);
 
     collectTreeData(tree, nodesData);
-    uncollectNodesData(collectTreeData(nodesData.nodes[oldNodeId]), nodesData);
+    uncollectNodesData(collectTreeData(nodesData.nodes[oldNodeId], undefined, false), nodesData);
 
     emit('replace', { newNode : serializeTree(tree) });
 }
@@ -125,14 +125,14 @@ function onDomNodeSelect(domNode) {
     }
 }
 
-function collectTreeData(treeNode, res = { nodes : {}, domNodes : {} }) {
+function collectTreeData(treeNode, res = { nodes : {}, domNodes : {} }, deep = true) {
     const { nodes, domNodes } = res,
         { domNodeId } = treeNode;
 
     nodes[treeNode.id] = treeNode;
     (domNodes[domNodeId] || (domNodes[domNodeId] = [])).push(treeNode.id);
 
-    if(Array.isArray(treeNode.children)) {
+    if((deep || treeNode.node._type === 'tag') && Array.isArray(treeNode.children)) {
         treeNode.children.forEach(child => collectTreeData(child, res));
     }
 
