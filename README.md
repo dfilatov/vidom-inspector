@@ -8,4 +8,4 @@ Vidom inspector is a developer tool which helps you debug your vidom-based appli
   * Actual representation of the current state of vidom trees presented on a page
   * Highlighting of the corresponding DOM nodes on a page
   * Scrolling to the corresponding DOM nodes on a page
-  * Highlighting of the corresponding vidom nodes in a tree
+  * Selecting DOM nodes on a page and highlighting of the corresponding vidom nodes in the inspector
