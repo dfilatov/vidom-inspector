@@ -25,7 +25,6 @@ function onInspectorInit() {
         const tree = buildTree(rootNode);
 
         collectTreeData(tree, nodesData);
-
         rootNodes[tree.id] = serializeTree(tree);
     });
 
@@ -71,21 +70,24 @@ function onRootNodeUnmount(rootNode) {
 }
 
 function onNodeReplace(oldNode, newNode) {
-    const oldNodeId = identifyNode(oldNode),
-        { rootId, path } = nodesData.nodes[oldNodeId],
-        tree = buildTree(newNode, rootId, path);
+    const oldTreeNode = nodesData.nodes[identifyNode(oldNode)],
+        newTreeNode = oldTreeNode.path.length?
+            buildTree(newNode, oldTreeNode.rootId, oldTreeNode.path) :
+            buildTree(newNode);
 
-    collectTreeData(tree, nodesData);
-    uncollectNodesData(collectTreeData(nodesData.nodes[oldNodeId], undefined, false), nodesData);
+    updateNodesData(oldTreeNode, newTreeNode);
 
-    emit('replace', { newNode : serializeTree(tree) });
+    emit('replace', { oldNode : serializeTree(oldTreeNode), newNode : serializeTree(newTreeNode) });
 }
 
 function onHighlightNode({ nodeId }) {
-    const { nodes } = nodesData;
+    const { nodes } = nodesData,
+        treeNode = nodes[nodeId];
 
-    if(nodes[nodeId]) {
-        highlighter.highlight(nodes[nodeId].node.getDomNode());
+    if(treeNode) {
+        const domNode = treeNode.node.getDomNode();
+
+        highlighter.highlight(treeNode.node.type === 1? domNode.parentNode : domNode);
     }
 }
 
@@ -117,22 +119,25 @@ function onDomNodeHover(domNode) {
 
 function onDomNodeSelect(domNode) {
     const domNodeId = getDomNodeId(domNode),
-        nodeIds = nodesData.domNodes[domNodeId];
+        nodeId = nodesData.domNodes[domNodeId];
 
-    if(nodeIds) {
-        const mostInnerTreeNode = nodesData.nodes[nodeIds[nodeIds.length - 1]];
+    if(nodeId) {
+        const mostInnerTreeNode = nodesData.nodes[nodeId];
         emit('expand', { rootId : mostInnerTreeNode.rootId, path : mostInnerTreeNode.path });
     }
 }
 
-function collectTreeData(treeNode, res = { nodes : {}, domNodes : {} }, deep = true) {
+function collectTreeData(treeNode, res = { nodes : {}, domNodes : {} }) {
     const { nodes, domNodes } = res,
         { domNodeId } = treeNode;
 
     nodes[treeNode.id] = treeNode;
-    (domNodes[domNodeId] || (domNodes[domNodeId] = [])).push(treeNode.id);
 
-    if((deep || treeNode.node._type === 'tag') && Array.isArray(treeNode.children)) {
+    if(domNodeId) {
+        domNodes[treeNode.domNodeId] = treeNode.id;
+    }
+
+    if(Array.isArray(treeNode.children)) {
         treeNode.children.forEach(child => collectTreeData(child, res));
     }
 
@@ -148,13 +153,28 @@ function uncollectNodesData(from, res) {
     }
 
     for(let domNodeId in fromDomNodes) {
-        fromDomNodes[domNodeId].forEach(nodeId => {
-            resDomNodes[domNodeId].splice(resDomNodes[domNodeId].indexOf(nodeId), 1);
-            if(!resDomNodes[domNodeId].length) {
-                delete resDomNodes[domNodeId];
-            }
-        });
+        delete resDomNodes[domNodeId];
     }
+}
+
+function updateNodesData(oldTreeNode, newTreeNode) {
+    uncollectNodesData(collectTreeData(oldTreeNode), nodesData);
+
+    const path = newTreeNode.path,
+        rootId = newTreeNode.rootId;
+
+    if(path.length) {
+        let parentTreeNode = nodesData.nodes[rootId],
+            i = 0;
+
+        while(i < path.length - 1) {
+            parentTreeNode = parentTreeNode.children[path[i++]];
+        }
+
+        parentTreeNode.children[path[i]] = newTreeNode;
+    }
+
+    collectTreeData(newTreeNode, nodesData);
 }
 
 function emit(type, payload) {

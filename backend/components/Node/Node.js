@@ -1,4 +1,4 @@
-import Stateful from '../Stateful';
+import { Component } from  'vidom';
 import bem from 'b_';
 import Value from '../Value';
 
@@ -11,22 +11,20 @@ const b = bem.with('Node'),
     attrNameClass = b('attrName'),
     attrValueClass = b('attrValue');
 
-export default class Node extends Stateful {
+export default class Node extends Component {
     onInit() {
-        super.onInit();
-
         this._onMouseOver = this._onMouseOver.bind(this);
         this._onMouseOut = this._onMouseOut.bind(this);
         this._onCollapserClick = this._onCollapserClick.bind(this);
         this._onTagNameClick = this._onTagNameClick.bind(this);
     }
 
-    getInitialState({ node, expandPath, level }) {
+    onInitialStateRequest({ node, expandPath, level }) {
         const inExpandPath = !!(expandPath && expandPath[level] === node.id);
 
         return {
             hovered : false,
-            collapsed : node.type !== 'tag' && !inExpandPath,
+            collapsed : node.type > 3 && !inExpandPath,
             selected : inExpandPath && expandPath.length === level + 1
         };
     }
@@ -63,14 +61,14 @@ export default class Node extends Stateful {
                 onMouseOut={ this._onMouseOut }
                 >
                 <div key="open" class={ tagClass } style={ tagStyle } dom-ref="openTag">
-                    { !hasChildren || onlyStringChild?
+                    { !hasChildren || onlyStringChild || type === 3?
                         null :
                         <span class={ collapserClass } onClick={ this._onCollapserClick }>
                             { collapsed? '▶' : '▼' }
                         </span>
                     }
                     <span class={ tagNameClass } onClick={ this._onTagNameClick }>{ '<' + name }</span>
-                    { renderAttrs(node, attrs) }
+                    { attrs && renderAttrs(node, attrs) }
                     <span>
                         { (hasChildren && !collapsed? '' : '/') + '>' }
                     </span>
@@ -177,7 +175,7 @@ export default class Node extends Stateful {
 
 function renderAttrs(node, { value }) {
     return value && Object.keys(value).map(name => {
-        if(node.type === 'tag' && value[name].type === 'boolean') {
+        if(node.type === 2 && value[name].type === 'boolean') {
             return value[name].value?
                 <span key={ name } class={ b('attr') }>
                     <span key="name" class={ b('attrName') }>{ name }</span>

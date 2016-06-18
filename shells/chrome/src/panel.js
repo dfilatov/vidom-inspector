@@ -4,7 +4,8 @@ import checkForVidom from './checkForVidom';
 let port = chrome.runtime.connect({
         name : '' + chrome.devtools.inspectedWindow.tabId
     }),
-    checkForVidomInterval = null;
+    checkForVidomInterval = null,
+    messagesBuffer = [];
 
 port.onMessage.addListener(onPortMessage);
 
@@ -16,10 +17,17 @@ function onPortMessage(message) {
         chrome.devtools.network.onNavigated.addListener(onNavigated);
     }
     else if(message.type === 'initAgent') {
+        messagesBuffer.push(message);
         window.addEventListener('message', onWindowMessage);
         mount(document.body, () => {
-            window.postMessage(message, '*');
+            messagesBuffer.forEach(message => {
+                window.postMessage(message, '*');
+            });
+            messagesBuffer = [];
         });
+    }
+    else if(messagesBuffer.length) {
+        messagesBuffer.push(message);
     }
     else {
         window.postMessage(message, '*');
@@ -35,6 +43,7 @@ function onWindowMessage({ data }) {
 function onNavigated() {
     chrome.devtools.network.onNavigated.removeListener(onNavigated);
     window.removeEventListener('message', onWindowMessage);
+    messagesBuffer = [];
     window.postMessage({ type : 'shutdown' }, '*');
 
     checkForVidomInterval = setInterval(detectVidom, 1000);

@@ -10,27 +10,47 @@ export default function buildTree(node, parentRootId, path = []) {
         rootId,
         path,
         node,
-        domNodeId : getDomNodeId(node.getDomNode()),
+        domNodeId :
+            node.type === 1?
+                getDomNodeId(node.getDomNode().parentNode) :
+                node.type === 2?
+                    getDomNodeId(node.getDomNode()) :
+                    null,
         children : buildNodeChildren(node, rootId, path)
     };
 }
 
 function buildNodeChildren(node, rootId, path) {
-    if(node._tag) {
-        const children = node._children;
+    switch(node.type) {
+        case 1:
+            return [buildTree(
+                node._childNode,
+                rootId,
+                [...path, 0])
+            ];
 
-        return children?
-            typeof children === 'string'?
-                children :
-                children.map((node, i) => buildTree(node, rootId, [...path, i])) :
-            null;
+        case 2:
+        case 3:
+            const children = node._children;
+
+            return children?
+                typeof children === 'string'?
+                    children :
+                    children.map((node, i) => buildTree(node, rootId, [...path, i])) :
+                null;
+
+        case 4:
+            return [buildTree(
+                node._instance.getRootNode(),
+                rootId,
+                [...path, 0])
+            ];
+
+        case 5:
+            return [buildTree(
+                node._getRootNode(),
+                rootId,
+                [...path, 0])
+            ];
     }
-
-    return [buildTree(
-        node._instance?
-            node._instance.getRootNode() :
-            node._getRootNode(),
-        rootId,
-        [...path, 0])
-    ];
 }

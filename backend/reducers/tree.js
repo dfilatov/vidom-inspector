@@ -13,7 +13,7 @@ const INITIAL_STATE = {
         nodeSelectorEnabled : false
     },
     reducers = {
-        ADD_ROOT_NODE(state, payload) {
+        [ADD_ROOT_NODE](state, payload) {
             return {
                 ...state,
                 rootNodes : {
@@ -23,7 +23,7 @@ const INITIAL_STATE = {
             };
         },
 
-        REMOVE_ROOT_NODE(state, payload) {
+        [REMOVE_ROOT_NODE](state, payload) {
             const { [payload.nodeId] : _, ...rootNodes } = state.rootNodes;
 
             return {
@@ -35,19 +35,16 @@ const INITIAL_STATE = {
             };
         },
 
-        REPLACE_NODE(state, payload) {
-            const { path, rootId } = payload.newNode;
+        [REPLACE_NODE](state, { oldNode, newNode }) {
+            const { rootNodes } = state;
 
             return {
                 ...state,
-                rootNodes : {
-                    ...state.rootNodes,
-                    [rootId] : replaceNodeInPath(state.rootNodes[rootId], path, 0, payload.newNode)
-                }
+                rootNodes : replaceNode(oldNode, newNode, rootNodes)
             };
         },
 
-        EXPAND_NODES(state, payload) {
+        [EXPAND_NODES](state, payload) {
             const { path, rootId } = payload,
                 expandPath = [rootId];
 
@@ -65,14 +62,14 @@ const INITIAL_STATE = {
             };
         },
 
-        ENABLE_NODE_SELECTOR(state) {
+        [ENABLE_NODE_SELECTOR](state) {
             return {
                 ...state,
                 nodeSelectorEnabled : true
             };
         },
 
-        DISABLE_NODE_SELECTOR(state) {
+        [DISABLE_NODE_SELECTOR](state) {
             return {
                 ...state,
                 nodeSelectorEnabled : false,
@@ -87,36 +84,33 @@ export default function(state = INITIAL_STATE, action) {
         state;
 }
 
-function replaceNodeInPath(ancestorNode, path, i, newNode) {
-    const children = ancestorNode.children;
+function replaceNode(oldNode, newNode, rootNodes) {
+    if(oldNode.id === oldNode.rootId) {
+        const res = { ...rootNodes, [newNode.id] : newNode };
+
+        delete res[oldNode.id];
+
+        return res;
+    }
+
+    const { rootId, path } = oldNode;
 
     return {
-        ...ancestorNode,
+        ...rootNodes,
+        [rootId] : replaceChildNode(rootNodes[rootId], path, 0, newNode)
+    };
+}
+
+function replaceChildNode(parentNode, path, i, newNode) {
+    const children = parentNode.children;
+
+    return {
+        ...parentNode,
         children : [
             ...children.slice(0, path[i]),
             i === path.length - 1?
                 newNode :
-                replaceNodeInPath({ ...children[path[i]] }, path, i + 1, newNode),
-            ...children.slice(path[i] + 1)
-        ]
-    };
-}
-
-function updateNodeInPath(node, path, i, newProps) {
-    if(i === path.length) {
-        return {
-            ...node,
-            ...newProps
-        };
-    }
-
-    const children = node.children;
-
-    return {
-        ...node,
-        children : [
-            ...children.slice(0, path[i]),
-            updateNodeInPath({ ...children[path[i]] }, path, i + 1, newProps),
+                replaceChildNode({ ...children[path[i]] }, path, i + 1, newNode),
             ...children.slice(path[i] + 1)
         ]
     };

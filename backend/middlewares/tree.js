@@ -39,7 +39,7 @@ export default store => {
             break;
 
             case 'replace':
-                store.dispatch(replaceNode(payload.newNode));
+                store.dispatch(replaceNode(payload.oldNode, payload.newNode));
             break;
 
             case 'expand':
@@ -55,6 +55,7 @@ export default store => {
                     store.dispatch(removeRootNode(rootNodeId));
                 }
                 store.dispatch(disableNodeSelector());
+                inited = false;
             break;
         }
     });

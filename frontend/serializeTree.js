@@ -5,20 +5,49 @@ export default function serializeTree(treeNode) {
         id,
         rootId,
         path,
-        type : node._tag? 'tag' : 'component',
-        name : node._tag || node._component.name || 'Function',
+        type : node.type,
+        name : serializeTreeNodeName(treeNode),
         key : node._key,
         attrs : serializeTreeNodeAttrs(treeNode),
         children : serializeTreeNodeChildren(treeNode)
     };
 }
 
-function serializeTreeNodeAttrs({ node }) {
-    const attrs = node._tag || !node._instance?
-        node._attrs :
-        node._instance.getAttrs();
+function serializeTreeNodeName({ node }) {
+    switch(node.type) {
+        case 1:
+            return node.getDomNode().parentNode.tagName.toLowerCase();
 
-    return serialize(attrs);
+        case 2:
+            return node._tag;
+
+        case 3:
+            return 'fragment';
+
+        case 4:
+        case 5:
+            return node._component.name || 'Function';
+    }
+}
+
+function serializeTreeNodeAttrs({ node }) {
+    switch(node.type) {
+        case 1:
+            const domNode = node.getDomNode().parentNode,
+                attrs = {};
+
+            domNode.id && (attrs.id = domNode.id);
+            domNode.className && (attrs['class'] = domNode.className);
+
+            return serialize(attrs);
+
+        case 2:
+        case 5:
+            return serialize(node._attrs);
+
+        case 4:
+            return serialize(node._instance.getAttrs());
+    }
 }
 
 function serializeTreeNodeChildren(treeNode) {

@@ -22,10 +22,10 @@ export function removeRootNode(nodeId) {
     };
 }
 
-export function replaceNode(newNode) {
+export function replaceNode(oldNode, newNode) {
     return {
         type : REPLACE_NODE,
-        payload : { newNode }
+        payload : { oldNode, newNode }
     };
 }
 

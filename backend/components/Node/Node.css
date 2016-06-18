@@ -32,7 +32,13 @@
     color: #007281;
 }
 
-.Node_type_component>.Node__tag
+.Node_type_3>.Node__tag
+{
+    color: #999;
+}
+
+.Node_type_4>.Node__tag,
+.Node_type_5>.Node__tag
 {
     color: #d97e00;
 }
