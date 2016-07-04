@@ -41,9 +41,13 @@ export default {
     },
 
     highlight(domNode) {
-        const { left, top, right, bottom } = getBoundingClientRect(domNode),
-            width = right - left,
-            height = bottom - top,
+        const rect = getBoundingClientRect(domNode);
+
+        if(!rect) {
+            return;
+        }
+
+        const { left, top, width, height } = rect,
             { innerWidth : viewportWidth, innerHeight : viewportHeight } = window;
 
         highlighter.style.left = left + 'px';
@@ -102,37 +106,50 @@ export default {
 };
 
 function getBoundingClientRect(domNode) {
-    return Array.isArray(domNode)?
-        domNode.reduce(
-            (res, domNode) => {
-                const rect = getBoundingClientRect(domNode);
+    if(Array.isArray(domNode)) {
+        let left,
+            top,
+            right,
+            bottom,
+            currentChild = domNode[0],
+            childRect;
+        const lastChild = domNode[1];
 
-                if(!rect) {
-                    return res;
+        while(currentChild !== lastChild) {
+            if(currentChild.nodeType === Node.ELEMENT_NODE) {
+                childRect = currentChild.getBoundingClientRect();
+
+                if(typeof left === 'undefined' || childRect.left < left) {
+                    left = childRect.left;
                 }
 
-                if(typeof res.left === 'undefined' || rect.left < res.left) {
-                    res.left = rect.left;
+                if(typeof top === 'undefined' || childRect.top < top) {
+                    top = childRect.top;
                 }
 
-                if(typeof res.top === 'undefined' || rect.top < res.top) {
-                    res.top = rect.top;
+                if(typeof right === 'undefined' || childRect.right > right) {
+                    right = childRect.right;
                 }
 
-                if(typeof res.right === 'undefined' || rect.right > res.right) {
-                    res.right = rect.right;
+                if(typeof bottom === 'undefined' || childRect.bottom > bottom) {
+                    bottom = childRect.bottom;
                 }
+            }
 
-                if(typeof res.bottom === 'undefined' || rect.bottom > res.bottom) {
-                    res.bottom = rect.bottom;
-                }
+            currentChild = currentChild.nextSibling;
+        }
 
-                return res;
-            },
-            {}) :
-        domNode.getBoundingClientRect?
-            domNode.getBoundingClientRect() :
-            null;
+        return typeof left === 'undefined'?
+            null :
+            {
+                left,
+                top,
+                width : right - left,
+                height : bottom - top
+            };
+    }
+
+    return domNode.getBoundingClientRect();
 }
 
 function scrollIntoView(domNode) {
