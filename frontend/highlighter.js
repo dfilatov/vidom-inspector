@@ -116,8 +116,17 @@ function getBoundingClientRect(domNode) {
         const lastChild = domNode[1];
 
         while(currentChild !== lastChild) {
-            if(currentChild.nodeType === Node.ELEMENT_NODE) {
-                childRect = currentChild.getBoundingClientRect();
+            if(currentChild.nodeType === Node.ELEMENT_NODE || currentChild.nodeType === Node.TEXT_NODE) {
+                if(currentChild.nodeType === Node.ELEMENT_NODE) {
+                    childRect = currentChild.getBoundingClientRect();
+                }
+                else {
+                    const range = document.createRange();
+
+                    range.selectNode(currentChild);
+                    childRect = range.getBoundingClientRect();
+                    range.detach();
+                }
 
                 if(typeof left === 'undefined' || childRect.left < left) {
                     left = childRect.left;
@@ -154,8 +163,9 @@ function getBoundingClientRect(domNode) {
 
 function scrollIntoView(domNode) {
     if(Array.isArray(domNode)) {
-        domNode = domNode[0];
+        scrollIntoView(domNode[0].parentNode);
     }
-
-    domNode.scrollIntoView();
+    else {
+        domNode.scrollIntoView();
+    }
 }

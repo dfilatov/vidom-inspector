@@ -24,7 +24,7 @@ export default class Node extends Component {
 
         return {
             hovered : false,
-            collapsed : node.type > 3 && !inExpandPath,
+            collapsed : node.type > 4 && !inExpandPath,
             selected : inExpandPath && expandPath.length === level + 1
         };
     }
@@ -61,7 +61,7 @@ export default class Node extends Component {
                 onMouseOut={ this._onMouseOut }
                 >
                 <div key="open" class={ tagClass } style={ tagStyle } dom-ref="openTag">
-                    { !hasChildren || onlyStringChild || type === 3?
+                    { !hasChildren || onlyStringChild || type === 4?
                         null :
                         <span class={ collapserClass } onClick={ this._onCollapserClick }>
                             { collapsed? '▶' : '▼' }

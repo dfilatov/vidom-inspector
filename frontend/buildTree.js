@@ -31,6 +31,7 @@ function buildNodeChildren(node, rootId, path) {
 
         case 2:
         case 3:
+        case 4:
             const children = node._children;
 
             return children?
@@ -39,14 +40,14 @@ function buildNodeChildren(node, rootId, path) {
                     children.map((node, i) => buildTree(node, rootId, [...path, i])) :
                 null;
 
-        case 4:
+        case 5:
             return [buildTree(
                 node._instance.getRootNode(),
                 rootId,
                 [...path, 0])
             ];
 
-        case 5:
+        case 6:
             return [buildTree(
                 node._getRootNode(),
                 rootId,

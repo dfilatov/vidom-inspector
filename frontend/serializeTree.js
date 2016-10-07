@@ -16,16 +16,21 @@ export default function serializeTree(treeNode) {
 function serializeTreeNodeName({ node }) {
     switch(node.type) {
         case 1:
-            return node.getDomNode().parentNode.tagName.toLowerCase();
+            const domNode = node.getDomNode();
+
+            return domNode && domNode.parentNode.tagName.toLowerCase();
 
         case 2:
             return node._tag;
 
         case 3:
-            return 'fragment';
+            return 'text';
 
         case 4:
+            return 'fragment';
+
         case 5:
+        case 6:
             return node._component.name || 'Function';
     }
 }
@@ -33,20 +38,22 @@ function serializeTreeNodeName({ node }) {
 function serializeTreeNodeAttrs({ node }) {
     switch(node.type) {
         case 1:
-            const domNode = node.getDomNode().parentNode,
-                attrs = {};
+            const domNode = node.getDomNode();
 
-            domNode.id && (attrs.id = domNode.id);
-            domNode.className && (attrs['class'] = domNode.className);
+            if(domNode) {
+                const parentDomNode = domNode.parentNode,
+                    attrs = {};
 
-            return serialize(attrs);
+                parentDomNode.id && (attrs.id = parentDomNode.id);
+                parentDomNode.className && (attrs['class'] = parentDomNode.className);
+
+                return serialize(attrs);
+            }
 
         case 2:
         case 5:
+        case 6:
             return serialize(node._attrs);
-
-        case 4:
-            return serialize(node._instance.getAttrs());
     }
 }
 
