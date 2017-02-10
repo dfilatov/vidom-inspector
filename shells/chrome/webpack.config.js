@@ -1,7 +1,10 @@
-var jsLoaders = ['babel'];
+var webpack = require('webpack'),
+    jsLoaders = ['babel'],
+    plugins = [];
 
 if(process.env.NODE_ENV === 'production') {
     jsLoaders.push('transform?envify');
+    plugins.push(new webpack.optimize.UglifyJsPlugin());
 }
 
 module.exports = {
@@ -18,5 +21,6 @@ module.exports = {
             { test : /\.js$/, loaders : jsLoaders },
             { test: /\.css$/, loaders : ['style', 'css'] }
         ]
-    }
+    },
+    plugins
 };
