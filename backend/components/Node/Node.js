@@ -13,23 +13,33 @@ const b = bem.with('Node'),
 
 export default class Node extends Component {
     onInit() {
+        this._openTagRef = null;
+        this._closeTagRef = null;
+
         this._onMouseOver = this._onMouseOver.bind(this);
         this._onMouseOut = this._onMouseOut.bind(this);
         this._onCollapserClick = this._onCollapserClick.bind(this);
         this._onTagNameClick = this._onTagNameClick.bind(this);
-    }
+        this._onOpenTagRef = ref => {
+            this._openTagRef = ref;
+        };
+        this._onCloseTagRef = ref => {
+            this._closeTagRef = ref;
+        };
 
-    onInitialStateRequest({ node, expandPath, level }) {
-        const inExpandPath = !!(expandPath && expandPath[level] === node.id);
+        const { node, expandPath, level } = this.attrs,
+            inExpandPath = !!(expandPath && expandPath[level] === node.id);
 
-        return {
+        this.setState({
             hovered : false,
             collapsed : node.type > 4 && !inExpandPath,
             selected : inExpandPath && expandPath.length === level + 1
-        };
+        });
     }
 
-    onAttrsReceive({ expandPath, level }, { expandPath : prevExpandPath, node }) {
+    onAttrsChange({ expandPath : prevExpandPath, node }) {
+        const { expandPath, level } = this.attrs;
+
         if(expandPath !== prevExpandPath) {
             if(expandPath && expandPath[level] === node.id) {
                 this.setState({
@@ -43,13 +53,14 @@ export default class Node extends Component {
         }
     }
 
-    shouldUpdate({ node }, { node : prevNode }) {
-        return node !== prevNode || this.getState() !== this.getPrevState();
+    shouldUpdate({ node : prevNode }, _, prevState) {
+        return this.attrs.node !== prevNode || this.state !== prevState;
     }
 
-    onRender({ node, actions, level, expandPath }) {
-        const { type, name, attrs, children } = node,
-            { hovered, collapsed, selected } = this.getState(),
+    onRender() {
+        const { node, actions, level, expandPath } = this.attrs,
+            { type, name, attrs, children } = node,
+            { hovered, collapsed, selected } = this.state,
             hasChildren = !!children,
             onlyStringChild = hasChildren && typeof children === 'string',
             tagStyle = { paddingLeft : (level + 1.2) + 'em' };
@@ -60,7 +71,7 @@ export default class Node extends Component {
                 onMouseOver={ this._onMouseOver }
                 onMouseOut={ this._onMouseOut }
                 >
-                <div key="open" class={ tagClass } style={ tagStyle } dom-ref="openTag">
+                <div key="open" class={ tagClass } style={ tagStyle } ref={ this._onOpenTagRef }>
                     { !hasChildren || onlyStringChild || type === 4?
                         null :
                         <span class={ collapserClass } onClick={ this._onCollapserClick }>
@@ -91,7 +102,7 @@ export default class Node extends Component {
                             key="close"
                             class={ tagClass }
                             style={ onlyStringChild? null : tagStyle }
-                            dom-ref="closeTag"
+                            ref={ this._onCloseTagRef }
                             >
                             { '</'}
                             <span class={ tagNameClass } onClick={ this._onTagNameClick }>{ name }</span>
@@ -105,28 +116,28 @@ export default class Node extends Component {
     }
 
     onMount() {
-        if(this.getState().selected) {
-            scrollIntoViewIfNeeded(this.getDomRef('openTag'));
+        if(this.state.selected) {
+            scrollIntoViewIfNeeded(this._openTagRef);
         }
     }
 
-    onUpdate() {
-        const { selected, hovered } = this.getState();
+    onUpdate(prevAttrs, prevChildren, prevState) {
+        const { selected, hovered } = this.state;
 
-        if(selected && !this.getPrevState().selected) {
-            scrollIntoViewIfNeeded(this.getDomRef('openTag'));
+        if(selected && !prevState.selected) {
+            scrollIntoViewIfNeeded(this._openTagRef);
         }
 
         if(hovered) {
-            const { node, actions } = this.getAttrs();
+            const { node, actions } = this.attrs;
 
             actions.highlightNode(node);
         }
     }
 
     onUnmount() {
-        if(this.getState().hovered) {
-            const { node, actions } = this.getAttrs();
+        if(this.state.hovered) {
+            const { node, actions } = this.attrs;
 
             actions.unhighlightNode(node);
         }
@@ -135,9 +146,9 @@ export default class Node extends Component {
     _onMouseOver(e) {
         e.stopPropagation();
 
-        const { node, actions } = this.getAttrs();
+        const { node, actions } = this.attrs;
 
-        if(!this.getState().hovered) {
+        if(!this.state.hovered) {
            this.setState({ hovered : true });
 
            actions.highlightNode(node);
@@ -149,10 +160,10 @@ export default class Node extends Component {
 
         const { relatedTarget } = e.nativeEvent;
 
-        if(['openTag', 'closeTag'].every(ref => !this.getDomRef(ref) || !this.getDomRef(ref).contains(relatedTarget))) {
+        if([this._openTagRef, this._closeTagRef].every(ref => !ref || !ref.contains(relatedTarget))) {
             this.setState({ hovered : false });
 
-            const { node, actions } = this.getAttrs();
+            const { node, actions } = this.attrs;
 
             actions.unhighlightNode(node);
         }
@@ -161,13 +172,13 @@ export default class Node extends Component {
     _onCollapserClick(e) {
         e.stopPropagation();
 
-        this.setState({ collapsed : !this.getState().collapsed });
+        this.setState({ collapsed : !this.state.collapsed });
     }
 
     _onTagNameClick(e) {
         e.stopPropagation();
 
-        const { node, actions } = this.getAttrs();
+        const { node, actions } = this.attrs;
 
         actions.showNode(node);
     }

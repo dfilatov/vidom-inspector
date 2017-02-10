@@ -1,5 +1,5 @@
 import { Component } from 'vidom';
-import connect from '../../util/connect';
+import { connect } from 'vidom-redux';
 import * as treeActions from '../../actions/tree';
 import ToolbarButton from './ToolbarButton';
 import bem from 'b_';
@@ -7,20 +7,21 @@ import bem from 'b_';
 const b = bem.with('Toolbar');
 
 class Toolbar extends Component {
-    onRender({ tree, actions }) {
-        const { nodeSelectorEnabled, rootNodes } = tree;
+    onRender() {
+        const { tree, enableNodeSelector, disableNodeSelector } = this.attrs,
+            { nodeSelectorEnabled, rootNodes } = tree;
 
         return Object.keys(rootNodes).length?
             <div class={ b() }>
                 { nodeSelectorEnabled?
                     <ToolbarButton
                         iconId="selector-enabled"
-                        onClick={ actions.disableNodeSelector }
+                        onClick={ disableNodeSelector }
                         title="Disable element selector"
                     /> :
                     <ToolbarButton
                         iconId="selector-disabled"
-                        onClick={ actions.enableNodeSelector }
+                        onClick={ enableNodeSelector }
                         title="Enable element selector"
                     />
                 }

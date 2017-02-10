@@ -13,14 +13,14 @@
     "babel-core": "6.4.0",
     "babel-loader": "6.2.1",
     "babel-plugin-transform-object-rest-spread": "6.3.13",
-    "babel-plugin-vidom-jsx": "0.3.0",
+    "babel-plugin-vidom-jsx": "0.5.0",
     "babel-preset-es2015": "6.3.13",
     "css-loader": "0.16.0",
     "envify": "3.4.0",
     "style-loader": "0.12.3",
     "transform-loader": "0.2.3",
-    "webpack": "1.12.9",
-    "webpack-dev-server": "1.14.1"
+    "webpack": "1.14.0",
+    "webpack-dev-server": "1.16.2"
   },
   "license": "MIT",
   "scripts": {
@@ -29,7 +29,8 @@
   },
   "dependencies": {
     "b_": "1.3.3",
-    "redux": "3.3.1",
-    "vidom": "0.4.0"
+    "redux": "3.6.0",
+    "vidom": "0.8.1",
+    "vidom-redux": "0.2.0"
   }
 }

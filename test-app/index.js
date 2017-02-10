@@ -1,4 +1,4 @@
-import { Component, mountToDom, unmountFromDom } from 'vidom';
+import { Component, mount, unmount } from 'vidom';
 
 function FunctionComponent({ idx, cnt }) {
     return (
@@ -10,10 +10,10 @@ function FunctionComponent({ idx, cnt }) {
 }
 
 class ClassComponent extends Component {
-    onRender({ numProp }) {
+    onRender() {
         return (
             <td>
-                <span>{ numProp }</span>
+                <span>{ this.attrs.numProp }</span>
             </td>
         );
     }
@@ -42,10 +42,8 @@ class App extends Component {
     }
 }
 
-mountToDom(document.getElementById('app'), <App/>);
+mount(document.body, <App/>);
 
-//
-//setTimeout(function() {
-//    unmountFromDom(document.getElementById('app'));
-//}, 1000)
-//
+// setTimeout(function() {
+//    unmount(document.body);
+// }, 1000);

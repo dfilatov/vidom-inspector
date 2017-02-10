@@ -1,5 +1,5 @@
 import { Component } from 'vidom';
-import connect from '../../util/connect';
+import { connect } from 'vidom-redux';
 import * as treeActions from '../../actions/tree';
 import bem from 'b_';
 import Node from '../Node';
@@ -7,8 +7,9 @@ import Node from '../Node';
 const b = bem.with('Tree');
 
 class Tree extends Component {
-    onRender({ tree, actions }) {
-        const { rootNodes, expandPath } = tree;
+    onRender() {
+        const { tree, highlightNode, unhighlightNode, showNode } = this.attrs,
+            { rootNodes, expandPath } = tree;
 
         return (
             <div class={ b() }>
@@ -19,7 +20,7 @@ class Tree extends Component {
                             node={ rootNodes[id] }
                             level={ 0 }
                             expandPath={ expandPath }
-                            actions={ actions }
+                            actions={ { highlightNode, unhighlightNode, showNode } }
                         />)
                 }
             </div>
