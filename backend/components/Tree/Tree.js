@@ -7,8 +7,9 @@ import Node from '../Node';
 const b = bem.with('Tree');
 
 class Tree extends Component {
-    onRender({ tree, actions }) {
-        const { rootNodes, expandPath } = tree;
+    onRender() {
+        const { tree, actions } = this.attrs,
+            { rootNodes, expandPath } = tree;
 
         return (
             <div class={ b() }>

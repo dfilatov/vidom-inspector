@@ -7,8 +7,9 @@ import bem from 'b_';
 const b = bem.with('Toolbar');
 
 class Toolbar extends Component {
-    onRender({ tree, actions }) {
-        const { nodeSelectorEnabled, rootNodes } = tree;
+    onRender() {
+        const { tree, actions } = this.attrs,
+            { nodeSelectorEnabled, rootNodes } = tree;
 
         return Object.keys(rootNodes).length?
             <div class={ b() }>

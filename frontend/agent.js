@@ -123,6 +123,7 @@ function onDomNodeSelect(domNode) {
 
     if(nodeId) {
         const mostInnerTreeNode = nodesData.nodes[nodeId];
+
         emit('expand', { rootId : mostInnerTreeNode.rootId, path : mostInnerTreeNode.path });
     }
 }

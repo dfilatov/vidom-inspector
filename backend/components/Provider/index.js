@@ -1,7 +1,9 @@
 import { Component } from 'vidom';
 
 export default class Provider extends Component {
-    onInit({ store }) {
+    onInit() {
+        const { store } = this.attrs;
+
         this._childCtx = { store };
 
         let prevState = store.getState();
@@ -19,8 +21,8 @@ export default class Provider extends Component {
         return this._childCtx;
     }
 
-    onRender({ Component }) {
-        return <Component/>;
+    onRender() {
+        return this.children;
     }
 
     onUnmount() {

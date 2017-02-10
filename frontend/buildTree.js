@@ -32,7 +32,7 @@ function buildNodeChildren(node, rootId, path) {
         case 2:
         case 3:
         case 4:
-            const children = node._children;
+            const { children } = node;
 
             return children?
                 typeof children === 'string'?

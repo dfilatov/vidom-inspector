@@ -7,7 +7,7 @@ export default function serializeTree(treeNode) {
         path,
         type : node.type,
         name : serializeTreeNodeName(treeNode),
-        key : node._key,
+        key : node.key,
         attrs : serializeTreeNodeAttrs(treeNode),
         children : serializeTreeNodeChildren(treeNode)
     };
@@ -21,7 +21,7 @@ function serializeTreeNodeName({ node }) {
             return domNode && domNode.parentNode.tagName.toLowerCase();
 
         case 2:
-            return node._tag;
+            return node.tag;
 
         case 3:
             return 'text';
@@ -53,7 +53,7 @@ function serializeTreeNodeAttrs({ node }) {
         case 2:
         case 5:
         case 6:
-            return serialize(node._attrs);
+            return serialize(node.attrs);
     }
 }
 
@@ -106,10 +106,12 @@ function isPlainObject(obj) {
     }
 
     const ctor = obj.constructor;
+
     if(typeof ctor !== 'function') {
         return false;
     }
 
     const proto = ctor.prototype;
+
     return Object.prototype.toString.call(proto) === '[object Object]' && proto.hasOwnProperty('isPrototypeOf');
 }
