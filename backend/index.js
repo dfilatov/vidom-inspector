@@ -2,7 +2,7 @@ import { createStore, applyMiddleware } from 'redux';
 import { mount } from 'vidom';
 import rootReducer from './reducers';
 import treeMiddleware from './middlewares/tree';
-import Provider from './components/Provider';
+import { Provider } from 'vidom-redux';
 import App from './components/App';
 
 const createStoreWithMiddleware = applyMiddleware(treeMiddleware)(createStore),
