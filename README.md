@@ -1,3 +1,5 @@
+# ATTENTION! Current version doesn't support latest versions (0.10.x) of vidom which will be supported soon.
+
 # vidom inspector
 
 Vidom inspector is a developer tool which helps you debug your vidom-based application. Currently it exists as an extension to the chrome developer tools.
