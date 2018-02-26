@@ -32,12 +32,12 @@ export default class Node extends Component {
 
         this.setState({
             hovered : false,
-            collapsed : node.type > 4 && !inExpandPath,
+            collapsed : node.type > 3 && !inExpandPath,
             selected : inExpandPath && expandPath.length === level + 1
         });
     }
 
-    onAttrsChange({ expandPath : prevExpandPath, node }) {
+    onChange({ expandPath : prevExpandPath, node }) {
         const { expandPath, level } = this.attrs;
 
         if(expandPath !== prevExpandPath) {
@@ -53,7 +53,7 @@ export default class Node extends Component {
         }
     }
 
-    shouldUpdate({ node : prevNode }, _, prevState) {
+    shouldRerender({ node : prevNode }, _, prevState) {
         return this.attrs.node !== prevNode || this.state !== prevState;
     }
 
@@ -72,7 +72,7 @@ export default class Node extends Component {
                 onMouseOut={ this._onMouseOut }
                 >
                 <div key="open" class={ tagClass } style={ tagStyle } ref={ this._onOpenTagRef }>
-                    { !hasChildren || onlyStringChild || type === 4?
+                    { !hasChildren || onlyStringChild || type === 3?
                         null :
                         <span class={ collapserClass } onClick={ this._onCollapserClick }>
                             { collapsed? '▶' : '▼' }
@@ -186,7 +186,7 @@ export default class Node extends Component {
 
 function renderAttrs(node, { value }) {
     return value && Object.keys(value).map(name => {
-        if(node.type === 2 && value[name].type === 'boolean') {
+        if(node.type === 1 && value[name].type === 'boolean') {
             return value[name].value?
                 <span key={ name } class={ b('attr') }>
                     <span key="name" class={ b('attrName') }>{ name }</span>

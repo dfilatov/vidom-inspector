@@ -48,6 +48,8 @@ export default {
         }
 
         const { left, top, width, height } = rect,
+            right = left + width,
+            bottom = top + height,
             { innerWidth : viewportWidth, innerHeight : viewportHeight } = window;
 
         highlighter.style.left = left + 'px';
@@ -60,7 +62,7 @@ export default {
             tooltip.style.left = 'auto';
             tooltip.style.right = '0';
         }
-        else if(left <= 0) {
+        else if(right <= 0) {
             tooltip.style.right = 'auto';
             tooltip.style.left = '0';
         }
@@ -77,7 +79,7 @@ export default {
             tooltip.style.top = 'auto';
             tooltip.style.bottom = '0';
         }
-        else if(top <= 0) {
+        else if(bottom <= 0) {
             tooltip.style.bottom = 'auto';
             tooltip.style.top = '0';
         }
@@ -87,7 +89,7 @@ export default {
         }
         else {
             tooltip.style.bottom = 'auto';
-            tooltip.style.top = top + height + 'px';
+            tooltip.style.top = bottom + 'px';
         }
 
         tooltip.style.display = 'block';

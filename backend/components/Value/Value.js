@@ -9,7 +9,7 @@ export default function Value({ value, recursive = true }) {
 }
 
 const renderers = {
-    'boolean' : ({ value }) => <span class={ b({ type : 'boolean' }) }>{ value }</span>,
+    'boolean' : ({ value }) => <span class={ b({ type : 'boolean' }) }>{ value.toString() }</span>,
     'number' : ({ value }) => <span class={ b({ type : 'number'}) }>{ value }</span>,
     'string' : ({ value }) => <span class={ b({ type : 'string'}) }>{ '"' + value + '"' }</span>,
     'function' : ({ name }) => <span class={ b({ type : 'function'}) }>()</span>,

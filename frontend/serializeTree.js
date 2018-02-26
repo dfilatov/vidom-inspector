@@ -5,54 +5,54 @@ export default function serializeTree(treeNode) {
         id,
         rootId,
         path,
-        type : node.type,
+        type : node? node.type : 0,
         name : serializeTreeNodeName(treeNode),
-        key : node.key,
+        key : node && node.key,
         attrs : serializeTreeNodeAttrs(treeNode),
         children : serializeTreeNodeChildren(treeNode)
     };
 }
 
-function serializeTreeNodeName({ node }) {
+function serializeTreeNodeName(treeNode) {
+    const { id, rootId, node } = treeNode;
+
+    if(id === rootId) {
+        return getRootTreeNodeParentDomNode(treeNode).tagName.toLowerCase();
+    }
+
     switch(node.type) {
         case 1:
-            const domNode = node.getDomNode();
-
-            return domNode && domNode.parentNode.tagName.toLowerCase();
-
-        case 2:
             return node.tag;
 
-        case 3:
+        case 2:
             return 'text';
 
-        case 4:
+        case 3:
             return 'fragment';
 
+        case 4:
         case 5:
-        case 6:
-            return node._component.name || 'Function';
+            return node.component.name || 'Function';
     }
 }
 
-function serializeTreeNodeAttrs({ node }) {
+function serializeTreeNodeAttrs(treeNode) {
+    const { id, rootId, node } = treeNode;
+
+    if(id === rootId) {
+        const parentDomNode = getRootTreeNodeParentDomNode(treeNode),
+            attrs = {};
+
+        parentDomNode.id && (attrs.id = parentDomNode.id);
+        parentDomNode.className && (attrs['class'] = parentDomNode.className);
+
+        return serialize(attrs);
+    }
+
     switch(node.type) {
         case 1:
-            const domNode = node.getDomNode();
-
-            if(domNode) {
-                const parentDomNode = domNode.parentNode,
-                    attrs = {};
-
-                parentDomNode.id && (attrs.id = parentDomNode.id);
-                parentDomNode.className && (attrs['class'] = parentDomNode.className);
-
-                return serialize(attrs);
-            }
-
-        case 2:
+        case 4:
         case 5:
-        case 6:
             return serialize(node.attrs);
     }
 }
@@ -66,6 +66,12 @@ function serializeTreeNodeChildren(treeNode) {
 
 function serialize(something) {
     return serializers[typeof something](something);
+}
+
+function getRootTreeNodeParentDomNode(treeNode) {
+    const domNode = treeNode.node.getDomNode();
+
+    return (Array.isArray(domNode)? domNode[0] : domNode).parentNode;
 }
 
 const serializers = {

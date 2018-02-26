@@ -4,6 +4,7 @@ import identifyNode from './identifyNode';
 import highlighter from './highlighter';
 import selector from './selector';
 import getDomNodeId from './getDomNodeId';
+import getParentDomNode from './getParentDomNode';
 
 const messageHandlers = {
         initInspector : onInspectorInit,
@@ -16,7 +17,7 @@ const messageHandlers = {
     };
 
 const globalHook = window.__vidom__hook__;
-let nodesData = { nodes : {}, domNodes : {} };
+let nodesData = { nodes : Object.create(null), domNodes : Object.create(null) };
 
 function onInspectorInit() {
     const rootNodes = {};
@@ -87,11 +88,11 @@ function onHighlightNode({ nodeId }) {
     if(treeNode) {
         const domNode = treeNode.node.getDomNode();
 
-        highlighter.highlight(treeNode.node.type === 1? domNode.parentNode : domNode);
+        highlighter.highlight(treeNode.id === treeNode.rootId? getParentDomNode(domNode) : domNode);
     }
 }
 
-function onUnhighlightNode({ nodeId }) {
+function onUnhighlightNode() {
     highlighter.unhighlight();
 }
 
